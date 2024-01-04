@@ -1,0 +1,10 @@
+/_build/
+/cover/
+/deps/
+/doc/
+/.fetch
+erl_crash.dump
+*.ez
+pg_lsp-*.tar
+/tmp/
+pg_lsp.escript
