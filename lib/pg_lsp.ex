@@ -16,7 +16,9 @@ defmodule PgLsp do
   end
 
   defp read_message do
-    content_length = IO.read(:line)
+    line = IO.read(:line)
+    IO.puts(:stderr, line)
+    content_length = line
     |> String.split(" ")
     |> List.last
     |> String.trim
@@ -34,7 +36,30 @@ defmodule PgLsp do
   defp read_body(length) do
     IO.read(1)
     data = IO.read(length)
-    File.write!("log.txt", data, [:append])
-    IO.puts(:stderr, data)
+    {:ok, json} = JSON.decode(data)
+    IO.write :stderr, "Request: #{data}"
+    id = json["id"]
+    method = json["method"]
+
+    handle(id, method)
+  end
+
+  defp handle(id, "initialize") do
+    response = %{
+      :result => %{capabilities: %{}, serverInfo: %{name: "pglsp", version: "0.1"}},
+      # :result => %{capabilities: %{hoverProvider: true}},
+      :jsonrpc => "2.0",
+      :id => id
+    }
+    {:ok, resp} = JSON.encode(response)
+    content_length = String.length(resp)
+    IO.write(:stderr, resp)
+
+    IO.write("Content-Length: #{content_length}\r\n\r\n")
+    IO.write(resp)
+  end
+
+  defp handle(_id, "initialized") do
+    IO.write :stderr, "pglsp was initialized successfully"
   end
 end
