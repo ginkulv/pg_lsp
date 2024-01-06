@@ -1,4 +1,5 @@
 defmodule Handler do
+  def handle_request(nil), do: nil
   def handle_request(request) do
     id = request["id"]
     method = request["method"]
@@ -27,6 +28,6 @@ defmodule Handler do
 
   defp handle(_id, "shutdown", _params) do
     IO.write :stderr, "shutting down test LSP"
-    System.stop(0)
+    :todo
   end
 end
