@@ -8,14 +8,14 @@ defmodule PgLsp do
   end
 
   def serve do
-    read_message()
+    read_request()
+    |> handle_request
+
     serve()
   end
 
-  defp read_message do
-    line = IO.read(:line)
-    IO.puts(:stderr, line)
-    content_length = line
+  defp read_request do
+    content_length = IO.read(:line)
     |> String.split(" ")
     |> List.last
     |> String.trim
@@ -35,7 +35,7 @@ defmodule PgLsp do
     data = IO.read(length)
     {:ok, request} = JSON.decode(data)
     IO.write :stderr, "Request: #{data}"
-    handle_request(request)
+    request
   end
 
 end
