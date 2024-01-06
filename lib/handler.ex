@@ -10,7 +10,9 @@ defmodule Handler do
   defp handle(id, method, params \\ %{})
   defp handle(id, "initialize", _params) do
     response = %{
-      :result => %{capabilities: %{}, serverInfo: %{name: "pglsp", version: "0.1"}},
+      :result => %{capabilities: %{
+        textDocumentSync: %{openClose: true, change: 1}
+      }, serverInfo: %{name: "pglsp", version: "0.1"}},
       :jsonrpc => "2.0",
       :id => id
     }
@@ -29,5 +31,23 @@ defmodule Handler do
   defp handle(_id, "shutdown", _params) do
     IO.write :stderr, "shutting down test LSP"
     :todo
+  end
+
+  defp handle(_id, "textDocument/didOpen", params) do
+    doc = params["textDocument"]
+    text = doc["text"]
+    _version = doc["version"]
+    _languageId = doc["languageId"]
+    _uri = doc["uri"]
+    IO.puts :stderr, text
+  end
+
+  defp handle(_id, "textDocument/didChange", params) do
+    doc = params["textDocument"]
+    _version = doc["version"]
+    _uri = doc["uri"]
+    changes = params["contentChanges"]
+    changes 
+    |> Enum.each(fn c -> IO.puts(:stderr, c["text"]) end)
   end
 end
