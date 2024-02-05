@@ -10,9 +10,13 @@ defmodule Handler do
   defp handle(method, id, params \\ %{})
   defp handle("initialize", id, _params) do
     response = %{
-      result:  %{capabilities: %{
-        textDocumentSync: %{openClose: true, change: 1}
-      }, serverInfo: %{name: "pglsp", version: "0.1"}},
+      result: %{
+        capabilities: %{
+          textDocumentSync: %{openClose: true, change: 1},
+          diagnosticProvider: %{identifier: "help", interFileDependencies: false, workspaceDiagnostics: false},
+        },
+        serverInfo: %{name: "pglsp", version: "0.1"}
+      },
       jsonrpc: "2.0",
       id: id
     }
@@ -45,9 +49,29 @@ defmodule Handler do
   defp handle("textDocument/didChange", _id, params) do
     doc = params["textDocument"]
     _version = doc["version"]
-    _uri = doc["uri"]
+    uri = doc["uri"]
     changes = params["contentChanges"]
-    changes 
+    changes
     |> Enum.each(fn c -> IO.puts(:stderr, c["text"]) end)
+
+    response = %{
+      method: "textDocument/publishDiagnostics",
+      params: %{
+        uri: uri,
+        diagnostics: [
+          %{
+            range: %{start: %{line: 0, character: 0}, end: %{line: 0, character: 1}},
+            message: "hey",
+          }
+        ]
+      },
+      jsonrpc: "2.0",
+    }
+    {:ok, resp} = JSON.encode(response)
+    content_length = String.length(resp)
+    IO.write(:stderr, resp)
+
+    IO.write("Content-Length: #{content_length}\r\n\r\n")
+    IO.write(resp)
   end
 end
