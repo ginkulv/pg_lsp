@@ -7,7 +7,7 @@ defmodule Handler do
     handle(method, id, params)
   end
 
-  defp handle(method, id, params \\ %{})
+  defp handle(method, id, params)
   defp handle("initialize", id, _params) do
     response = %{
       result: %{
@@ -54,16 +54,20 @@ defmodule Handler do
     changes
     |> Enum.each(fn c -> IO.puts(:stderr, c["text"]) end)
 
+    diagnostics = changes
+      |> Enum.map(fn c -> Parser.parse(c["text"]) end)
+      |> Enum.flat_map(fn tokens ->
+        Enum.map(tokens, fn token -> %{
+            range: %{start: %{line: token.line, character: token.left}, end: %{line: token.line, character: token.right}},
+            message: token.value,
+          }
+        end)
+      end)
     response = %{
       method: "textDocument/publishDiagnostics",
       params: %{
         uri: uri,
-        diagnostics: [
-          %{
-            range: %{start: %{line: 0, character: 0}, end: %{line: 0, character: 1}},
-            message: "hey",
-          }
-        ]
+        diagnostics: diagnostics
       },
       jsonrpc: "2.0",
     }
