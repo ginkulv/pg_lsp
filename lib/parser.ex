@@ -3,8 +3,11 @@ defmodule Parser do
     defstruct [:type, :value, :line, :left, :right] 
 
     @type t :: %Token{
-      type: nil | :word | :column | :relation,
-      value: String.t()
+      type: :word | :symbol,
+      value: String.t(),
+      line: integer(),
+      left: integer(),
+      right: integer(),
     }
   end
 
@@ -14,8 +17,10 @@ defmodule Parser do
     |> tokenize
   end
 
-  defp tokenize([]), do: []
-  defp tokenize(str, line \\ 0, position \\ 0) do
+  @spec tokenize(list(String.t()), integer(), integer()) :: list(Token.t())
+  defp tokenize(str, line \\ 0, position \\ 0)
+  defp tokenize([], _line, _position), do: []
+  defp tokenize(str, line, position) do
     IO.puts :stderr, str
     token = get_token(str, line, position)
     case token do
@@ -27,8 +32,6 @@ defmodule Parser do
         tokenize(Enum.drop(str, 1), line, position + 1)
       {:newline, nil} ->
         tokenize(Enum.drop(str, 1), line + 1, position)
-      {:eof, nil} ->
-        []
       {:err, head} ->
         IO.puts :stderr, "Couldn't parse an element: " <> head
         []
@@ -36,7 +39,6 @@ defmodule Parser do
   end
 
   @spec get_token(list(String.t()), integer(), integer()) :: tuple()
-  defp get_token([], _, _), do: {:eof, nil}
   defp get_token(str, line, position) do
     head = hd(str)
     cond do
