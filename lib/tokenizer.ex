@@ -11,6 +11,10 @@ defmodule Tokenizer do
     }
   end
 
+  def keywords() do
+    ["SELECT", "FROM"]
+  end
+
   @doc """
   This function takes code as input and converts it to a list of tokens.
   Token represents the first layer of parsing code.
@@ -58,7 +62,12 @@ defmodule Tokenizer do
     |> Enum.take_while(&String.match?(&1, ~r/^[a-z]$/i))
     |> Enum.join
 
-    %Token{type: :word, value: value, line: line, left: position, right: position + String.length(value)}
+    type = case value |> String.upcase |> String.contains?(keywords()) do
+      true -> :keyword
+      false -> :word
+    end
+
+    %Token{type: type, value: value, line: line, left: position, right: position + String.length(value)}
   end
 
   defp get_token(str, line, position, :symbol) do
