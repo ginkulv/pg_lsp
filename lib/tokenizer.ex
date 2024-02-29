@@ -61,6 +61,7 @@ defmodule Tokenizer do
     value = str
     |> Enum.take_while(&String.match?(&1, ~r/^[a-z]$/i))
     |> Enum.join
+    |> String.upcase
 
     type = case value |> String.upcase |> String.contains?(keywords()) do
       true -> :keyword

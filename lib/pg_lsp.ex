@@ -16,7 +16,7 @@ defmodule PgLsp do
 
   defp read_request do
     content_length = IO.read(:line)
-    |> String.split(" ")
+    |> String.split
     |> List.last
     |> String.trim
     |> Integer.parse

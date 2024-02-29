@@ -54,14 +54,15 @@ defmodule Handler do
     changes
     |> Enum.each(fn c -> IO.puts(:stderr, c["text"]) end)
 
+    token_request = fn token -> %{
+            range: %{start: %{line: token.line, character: token.left}, end: %{line: token.line, character: token.right}},
+            message: token.value,
+    } end
+
     diagnostics = changes
       |> Enum.map(fn c -> Parser.parse(c["text"]) end)
       |> Enum.flat_map(fn tokens ->
-        Enum.map(tokens, fn token -> %{
-            range: %{start: %{line: token.line, character: token.left}, end: %{line: token.line, character: token.right}},
-            message: token.value,
-          }
-        end)
+        Enum.map(tokens, &token_request.(&1))
       end)
     response = %{
       method: "textDocument/publishDiagnostics",
