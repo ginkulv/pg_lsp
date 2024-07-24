@@ -24,8 +24,7 @@ defmodule Handler do
     content_length = String.length(resp)
     IO.write(:stderr, resp)
 
-    IO.write("Content-Length: #{content_length}\r\n\r\n")
-    IO.write(resp)
+    IO.write("Content-Length: #{content_length}\r\n\r\n#{resp}")
   end
 
   defp handle("initialized", _id, _params) do
