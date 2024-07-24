@@ -3,7 +3,7 @@ defmodule Tokenizer do
     defstruct [:type, :value, :line, :left, :right] 
 
     @type t :: %Token{
-      type: :word | :symbol,
+      type: :entity | :keyword | :symbol,
       value: String.t(),
       line: integer(),
       left: integer(),
@@ -65,7 +65,7 @@ defmodule Tokenizer do
 
     type = case value |> String.upcase |> String.contains?(keywords()) do
       true -> :keyword
-      false -> :word
+      false -> :entity
     end
 
     %Token{type: type, value: value, line: line, left: position, right: position + String.length(value)}
